@@ -37,7 +37,7 @@ if st.button('Download'):
 
         # Convert the audio to MP3
         base_path = os.getcwd()
-        input_file = os.path.join(base_path, f'{yt.title}.webm')
+        input_file = os.path.join(base_path, f'{yt.title}.{audio_stream.subtype}')
         output_file = os.path.join(base_path, f'{yt.title}.mp3')
         os.system(f'ffmpeg -i "{input_file}" -vn -ar 44100 -ac 2 -ab 192k -f mp3 "{output_file}"')
         os.remove(input_file)
