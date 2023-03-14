@@ -1,6 +1,7 @@
 import streamlit as st
 from pytube import YouTube
 import os
+import base64
 
 # Set page title and favicon
 st.set_page_config(page_title='YouTube Video Downloader', page_icon=':arrow_down:')
@@ -28,11 +29,11 @@ if st.button('Download'):
     # Download the video or audio
     if file_format == 'MP4':
         # Download the video
-        stream.download()
+        filename = stream.download()
     else:
         # Download the audio
         audio_stream = yt.streams.filter(only_audio=True).first()
-        audio_stream.download()
+        filename = audio_stream.download()
 
         # Convert the audio to MP3
         base_path = os.getcwd()
@@ -41,5 +42,16 @@ if st.button('Download'):
         os.system(f'ffmpeg -i "{input_file}" -vn -ar 44100 -ac 2 -ab 192k -f mp3 "{output_file}"')
         os.remove(input_file)
 
-    # Show success message
-    st.success(f'{file_format} downloaded successfully!')
+    # Load the file contents
+    with open(filename, 'rb') as f:
+        file_contents = f.read()
+
+    # Encode the file contents as base64
+    encoded_file = base64.b64encode(file_contents).decode()
+
+    # Construct the href link with the base64-encoded file and the suggested filename
+    href = f'<a href="data:application/octet-stream;base64,{encoded_file}" download="{yt.title}.{file_ext}">Download {file_format}</a>'
+
+    # Show success message with the download link
+    st.success(f'{file_format} downloaded successfully! Click the link below to download.')
+    st.markdown(href, unsafe_allow_html=True)
