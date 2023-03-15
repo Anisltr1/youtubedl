@@ -31,16 +31,13 @@ if st.button('Download'):
         # Download the video
         filename = stream.download()
     else:
-        # Download the audio
+        # Download the audio directly if it exists
         audio_stream = yt.streams.filter(only_audio=True).first()
-        filename = audio_stream.download()
-
-        # Convert the audio to MP3
-        base_path = os.getcwd()
-        input_file = os.path.join(base_path, f'{yt.title}.{audio_stream.subtype}')
-        output_file = os.path.join(base_path, f'{yt.title}.mp3')
-        os.system(f'ffmpeg -i "{input_file}" -vn -ar 44100 -ac 2 -ab 192k -f mp3 "{output_file}"')
-        os.remove(input_file)
+        if audio_stream is not None:
+            filename = audio_stream.download()
+        else:
+            st.error('Error: This video does not have an audio stream that can be downloaded in MP3 format.')
+            st.stop()
 
     # Load the file contents
     with open(filename, 'rb') as f:
@@ -55,3 +52,4 @@ if st.button('Download'):
     # Show success message with the download link
     st.success(f'{file_format} downloaded successfully! Click the link below to download.')
     st.markdown(href, unsafe_allow_html=True)
+
